@@ -584,6 +584,7 @@ class Request(object):
                         raise SSLError(e)
 
                     raise Timeout('Request timed out.')
+                self._build_response(r)
 
             except RequestException as e:
                 if self.config.get('safe_mode', False):
@@ -591,10 +592,9 @@ class Request(object):
                     # a blank urllib3.HTTPResponse object.
                     r = HTTPResponse()
                     r.error = e
+                    self._build_response(r)
                 else:
                     raise
-
-            self._build_response(r)
 
             # Response manipulation hook.
             self.response = dispatch_hook('response', self.hooks, self.response)

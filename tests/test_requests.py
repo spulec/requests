@@ -770,6 +770,18 @@ class RequestsTestSuite(TestSetup, unittest.TestCase):
         assert r.content is None
         assert isinstance(r.error, requests.exceptions.Timeout)
 
+        # When not in safe mode, should raise TooManyRedirects exception
+        self.assertRaises(
+            requests.exceptions.TooManyRedirects,
+            get,
+            httpbin('redirect', '3'), config=dict(max_redirects=2))
+
+        # In safe mode, should return a blank response
+        r = get(httpbin('redirect', '3'),
+            config=dict(safe_mode=True, max_redirects=2))
+        assert r.content is None
+        assert isinstance(r.error, requests.exceptions.TooManyRedirects)
+
     def test_upload_binary_data(self):
 
         requests.get(httpbin('post'), auth=('a', 'b'), data='\xff')
